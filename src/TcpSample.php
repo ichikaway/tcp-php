@@ -3,14 +3,15 @@ use TCPIPHP\Tcp\PhpTcp;
 
 require 'vendor/autoload.php';
 
-if ($argc < 2) {
-    fwrite(STDERR, "Error: No argument provided.\n");
+if ($argc < 4) {
+    fwrite(STDERR, "Error: php TcpSample.php srcIp dstIp dstPort\n");
     exit(1);
 }
 
-$dstArg = $argv[1];
-$srcIpArg = $argv[2];
+$srcIpArg = $argv[1];
+$dstIpArg = $argv[2];
+$dstPortArg = $argv[3];
 
 $PhpTcp = new PhpTcp($srcIpArg);
-$PhpTcp->connect($dstArg, 81);
+$PhpTcp->connect($dstIpArg, $dstPortArg);
 
