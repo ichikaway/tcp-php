@@ -1,0 +1,9 @@
+services:
+  tcp-php:
+    build:
+      context: ./
+    volumes:
+      - ./:/tcp
+    working_dir: /tcp
+    cap_add:
+      - NET_ADMIN
