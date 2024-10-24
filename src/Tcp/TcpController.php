@@ -28,8 +28,8 @@ class TcpController
         $this->dstIp = $dstIp;
         $this->dstPort = $dstPort;
 
-        $this->srcPort = rand(63000, 64000);
-        $this->seqNum = rand(2100000000, 2200000000);  // シーケンス番号をランダムに設定
+        $this->srcPort = rand(60000, 60100);
+        $this->seqNum = rand(2000001000, 2000003000);  // シーケンス番号をランダムに設定
 
         $this->TcpPacket = new TcpPacket($this->srcIp, $this->srcPort, $this->dstIp, $this->dstPort);
     }
