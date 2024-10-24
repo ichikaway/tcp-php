@@ -51,6 +51,17 @@ class TcpController
 
     }
 
+    public function send(string $data)
+    {
+        $flag = TcpUtil::createFlagByte(psh: 1, ack: 1);
+        $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum, flag: $flag, data: $data);
+        $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
+        var_dump($result);
+        // パケットの受信
+        echo "PSH 送信中...\n";
+        $this->receive();
+
+    }
     public function receive()
     {
         while (true) {
@@ -97,6 +108,28 @@ class TcpController
                 $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
                 break;
             }
+
+            //todo
+            // サーバからデータが送信されるpush/ackを受信する処理を作成
+
+            // Ack (0x10)のみ
+            if ($tcp_flags == 0x10) {
+                echo "ACKパケットを受信しました！\n";
+
+                //var_dump(ord($tcp_segment[12]));
+                //var_dump(ord($tcp_segment[12]) >> 4);
+                $tcp_header_size = (ord($tcp_segment[12]) >> 4) * 4;
+                var_dump("header size: ". $tcp_header_size);
+                $data = substr($buf, $tcp_header_start + $tcp_header_size);
+
+                var_dump("data: ". $data);
+
+                // ackの Ack Numにこちらから送信したシーケンス番号+送信データ量の値が帰るため、次の送信のシーケンス番号でそれを使う
+                $this->seqNum = $recvAckNum;
+                var_dump("SeqNum: " . $this->seqNum);
+                break;
+            }
+
         }
 
         return null;

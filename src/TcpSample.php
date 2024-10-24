@@ -15,3 +15,6 @@ $dstPortArg = $argv[3];
 $PhpTcp = new PhpTcp($srcIpArg);
 $PhpTcp->connect($dstIpArg, $dstPortArg);
 
+$data = 'GET / HTTP/1.0' . "\r\n\r\n" ;
+$PhpTcp->write($data);
+

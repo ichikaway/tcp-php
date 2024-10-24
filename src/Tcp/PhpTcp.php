@@ -31,7 +31,7 @@ class PhpTcp
         $this->TcpController= new TcpController($socket, $this->srcIp, $dstIp, $dstPort);
         $this->TcpController->handshake();
 
-        socket_close($socket);
+        //socket_close($socket);
     }
 
     public function read()
@@ -39,9 +39,10 @@ class PhpTcp
         //read data and return ack
     }
 
-    public function write()
+    public function write(string $data)
     {
         // write data and recv ack
+        $this->TcpController->send($data);
     }
 
     public function close()
