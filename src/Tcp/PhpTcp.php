@@ -37,6 +37,8 @@ class PhpTcp
     public function read()
     {
         //read data and return ack
+        $data = $this->TcpController->receive();
+        return $data;
     }
 
     public function write(string $data)

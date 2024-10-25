@@ -18,3 +18,6 @@ $PhpTcp->connect($dstIpArg, $dstPortArg);
 $data = 'GET / HTTP/1.0' . "\r\n\r\n" ;
 $PhpTcp->write($data);
 
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+
