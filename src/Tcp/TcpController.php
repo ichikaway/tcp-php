@@ -106,6 +106,7 @@ class TcpController
             $recvSeqNum = unpack('Nint', substr($tcp_segment, 4, 4))['int'];
             $recvAckNum = unpack('Nint', substr($tcp_segment, 8, 4))['int'];
 
+            //データ受信処理のため、ackで返す確認応答番号は相手から送信されてきたシーケンス番号となるためackNumにrecvSeqNumをセット
             $this->ackNum = $recvSeqNum;
 
             // SYN-ACKのフラグは、SYN (0x02) と ACK (0x10) の両方がセットされている必要がある
@@ -126,17 +127,22 @@ class TcpController
             // サーバからデータが送信されるpush(0x08)を受信する処理を作成
             if (($tcp_flags & 0x08) == 0x08) {
                 echo "PSHパケットを受信しました！\n";
-                //$this->seqNum++;
-                //$this->ackNum++;
 
                 $tcp_header_size = (ord($tcp_segment[12]) >> 4) * 4;
                 var_dump("header size: ". $tcp_header_size);
                 $data = substr($buf, $tcp_header_start + $tcp_header_size);
-                var_dump("data: ". $data);
-
+                //var_dump("data: ". $data);
 
                 var_dump("recvSeqNum: ". $recvSeqNum);
                 var_dump("recvAckNum: ". $recvAckNum);
+
+                $dataLen = strlen($data);
+                var_dump("data len: " . $dataLen);
+                if ($dataLen > 0) {
+                    // サーバからデータ受信しそのAckを返す時は、受け取ったシーケンス番号に対してさらに受け取ったデータサイズを足す
+                    $this->ackNum += $dataLen;
+                    var_dump("this->ackNum: " . $this->ackNum);
+                }
 
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
