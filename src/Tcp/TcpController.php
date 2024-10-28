@@ -91,6 +91,18 @@ class TcpController
             //var_dump($tcp_flags);
             //var_dump(bin2hex($tcp_segment));
 
+            $peerSrcPort = unpack('nint', substr($tcp_segment, 0, 2))['int'];
+            $peerDstPort = unpack('nint', substr($tcp_segment, 2, 4))['int'];
+
+            //受信パケットだけ受け付ける
+            // 相手からの受信パケットは、こちらから送信したportと逆になっているためそれをチェック
+            if ($peerSrcPort !== $this->dstPort  || $peerDstPort !== $this->srcPort) {
+                echo "src/dst port mismatch\n";
+                var_dump("  peerSrcPort: " . $peerSrcPort . ", dst port: " . $this->dstPort);
+                var_dump("  peerDstPort: " . $peerDstPort . ", src port: " . $this->srcPort);
+                continue;
+            }
+
             $recvSeqNum = unpack('Nint', substr($tcp_segment, 4, 4))['int'];
             $recvAckNum = unpack('Nint', substr($tcp_segment, 8, 4))['int'];
 
