@@ -62,12 +62,26 @@ class TcpController
         // パケットの受信
         echo "PSH後の受信...\n";
         $this->receive();
-
     }
+
+    public function fin()
+    {
+        echo "FIN/ACK 送信...\n";
+        $flag = TcpUtil::createFlagByte(fin: 1, ack: 1);
+        $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum, flag: $flag, data: '');
+        var_dump("send fin/ack packet: " . bin2hex($packet));
+        $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
+        //var_dump($result);
+        // パケットの受信
+        echo "FIN/ACK後の受信...\n";
+        $this->receive();
+    }
+
+
     public function receive()
     {
         while (true) {
-            echo "start receive\n";
+            echo "\n ===== start receive =====\n";
             $buf  = '';
             $from = '';
             $port = 0;
@@ -111,17 +125,53 @@ class TcpController
 
             // SYN-ACKのフラグは、SYN (0x02) と ACK (0x10) の両方がセットされている必要がある
             if (($tcp_flags & 0x12) == 0x12) {
-                echo "SYN-ACKパケットを受信しました！\n";
+                $flagName = 'SYN-ACK';
+                echo "{$flagName}パケットを受信しました！\n";
                 $this->seqNum++;
                 $this->ackNum++;
                 if (intval($recvAckNum) === $this->seqNum) {
-                    echo "SYN-ACKパケットack num: $recvAckNum\n";
+                    echo "{$flagName}パケットack num: $recvAckNum\n";
                 }
 
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
                 $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
                 break;
+            }
+
+            // FIN-ACLフラグは、 FIN(0x01) と ACK(0x10)
+            if (($tcp_flags & 0x11) == 0x11) {
+                $flagName = 'FIN-ACK';
+                echo "{$flagName}パケットを受信しました！\n";
+                if (intval($recvAckNum) === $this->seqNum) {
+                    echo "{$flagName}パケットack num: $recvAckNum\n";
+                }
+
+                $tcp_header_size = (ord($tcp_segment[12]) >> 4) * 4;
+                var_dump("header size: ". $tcp_header_size);
+                $data = substr($buf, $tcp_header_start + $tcp_header_size);
+                //var_dump("data: ". $data);
+
+                var_dump("recvSeqNum: ". $recvSeqNum);
+                var_dump("recvAckNum: ". $recvAckNum);
+
+                $dataLen = strlen($data);
+                var_dump("data len: " . $dataLen);
+
+                //fin-ackの場合は、データが付与されている場合があるため、データがある場合はデータサイズを足す
+                //それ以外は確認応答番号を1つ足す
+                if ($dataLen > 0) {
+                    // サーバからデータ受信しそのAckを返す時は、受け取ったシーケンス番号に対してさらに受け取ったデータサイズを足す
+                    $this->ackNum += $dataLen;
+                    var_dump("this->ackNum: " . $this->ackNum);
+                } else {
+                    $this->ackNum++;
+                }
+
+                $flag = TcpUtil::createFlagByte(ack: 1);
+                $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
+                $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
+                return $data;
             }
 
             // サーバからデータが送信されるpush(0x08)を受信する処理を作成

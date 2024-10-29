@@ -50,5 +50,6 @@ class PhpTcp
     public function close()
     {
         // fin
+        $this->TcpController->fin();
     }
 }

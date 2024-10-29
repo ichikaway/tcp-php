@@ -21,3 +21,21 @@ $PhpTcp->write($data);
 $recvData = $PhpTcp->read();
 var_dump($recvData);
 
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+
+
+$PhpTcp->close();
+
+/*
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+$recvData = $PhpTcp->read();
+var_dump($recvData);
+*/
