@@ -92,7 +92,7 @@ class TcpController
                 break;
             }
 
-            var_dump("recvfrom buf: " . bin2hex($buf));
+            var_dump("recvfrom buf: " . bin2hex($buf) . "\n");
 
             // 受信データがIPパケットとして正しいか確認
             $ip_header_length = (ord($buf[0]) & 0x0F) * 4;  // IPヘッダーの長さを取得
@@ -102,7 +102,7 @@ class TcpController
             $tcp_segment = substr($buf, $tcp_header_start, 20);  // TCPヘッダー部分だけ抜き出す
             $tcp_flags   = ord($tcp_segment[13]);  // TCPヘッダー内の13バイト目がフラグ
 
-            //var_dump($tcp_flags);
+            var_dump("Flag: 0x" . dechex($tcp_flags) . " , " . $tcp_flags);
             //var_dump(bin2hex($tcp_segment));
 
             $peerSrcPort = unpack('nint', substr($tcp_segment, 0, 2))['int'];
@@ -139,13 +139,10 @@ class TcpController
                 break;
             }
 
-            // FIN-ACLフラグは、 FIN(0x01) と ACK(0x10)
+            // FIN-ACKフラグは、 FIN(0x01) と ACK(0x10)
             if (($tcp_flags & 0x11) == 0x11) {
                 $flagName = 'FIN-ACK';
                 echo "{$flagName}パケットを受信しました！\n";
-                if (intval($recvAckNum) === $this->seqNum) {
-                    echo "{$flagName}パケットack num: $recvAckNum\n";
-                }
 
                 $tcp_header_size = (ord($tcp_segment[12]) >> 4) * 4;
                 var_dump("header size: ". $tcp_header_size);
@@ -163,10 +160,10 @@ class TcpController
                 if ($dataLen > 0) {
                     // サーバからデータ受信しそのAckを返す時は、受け取ったシーケンス番号に対してさらに受け取ったデータサイズを足す
                     $this->ackNum += $dataLen;
-                    var_dump("this->ackNum: " . $this->ackNum);
                 } else {
                     $this->ackNum++;
                 }
+                var_dump("this->ackNum: " . $this->ackNum);
 
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
