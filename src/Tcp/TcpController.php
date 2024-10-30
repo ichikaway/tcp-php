@@ -80,6 +80,8 @@ class TcpController
 
     public function receive()
     {
+        $dataBuf = '';
+
         while (true) {
             echo "\n ===== start receive =====\n";
             $buf  = '';
@@ -89,7 +91,7 @@ class TcpController
             // 受信バッファサイズを定義
             if (@socket_recvfrom($this->socket, $buf, 65535, 0, $from, $port) === false) {
                 echo "タイムアウト: TCPパケットを受信できませんでした。\n";
-                break;
+                return $dataBuf;
             }
 
             var_dump("recvfrom buf: " . bin2hex($buf) . "\n");
@@ -168,7 +170,8 @@ class TcpController
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
                 $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
-                return $data;
+                $dataBuf .= $data;
+                return $dataBuf;
             }
 
             // サーバからデータが送信されるpush(0x08)を受信する処理を作成
@@ -194,8 +197,8 @@ class TcpController
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
                 $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
-                return $data;
-                break;
+                $dataBuf .= $data;
+                continue;
             }
 
 
