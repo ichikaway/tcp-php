@@ -14,6 +14,8 @@ class TcpController
     private int $seqNum;
     private int $ackNum;
 
+    private int $finCount = 0;
+
     private TcpPacket $TcpPacket;
 
     /**
@@ -74,6 +76,9 @@ class TcpController
         //var_dump($result);
         // パケットの受信
         echo "FIN/ACK後の受信...\n";
+        $this->receive();
+        // FIN/ACKでACKを返した後、サーバからFIN/ACKが来るためもう一度receiveしてACKを返す
+        var_dump("finCount: " . $this->finCount);
         $this->receive();
     }
 
@@ -170,6 +175,9 @@ class TcpController
                 $flag = TcpUtil::createFlagByte(ack: 1);
                 $packet = $this->TcpPacket->createTcpPacket(seqNum:$this->seqNum, ackNum: $this->ackNum,flag: $flag, data: '');
                 $result = socket_sendto($this->socket, $packet, strlen($packet), 0, $this->dstIp, $this->dstPort);
+
+                $this->finCount++;
+
                 $dataBuf .= $data;
                 return $dataBuf;
             }
