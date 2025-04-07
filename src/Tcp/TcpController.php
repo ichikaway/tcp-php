@@ -118,9 +118,9 @@ class TcpController
             //受信パケットだけ受け付ける
             // 相手からの受信パケットは、こちらから送信したportと逆になっているためそれをチェック
             if ($peerSrcPort !== $this->dstPort  || $peerDstPort !== $this->srcPort) {
-                echo "src/dst port mismatch\n";
-                var_dump("  peerSrcPort: " . $peerSrcPort . ", dst port: " . $this->dstPort);
-                var_dump("  peerDstPort: " . $peerDstPort . ", src port: " . $this->srcPort);
+                //echo "src/dst port mismatch\n";
+                //var_dump("  peerSrcPort: " . $peerSrcPort . ", dst port: " . $this->dstPort);
+                //var_dump("  peerDstPort: " . $peerDstPort . ", src port: " . $this->srcPort);
                 continue;
             }
 
