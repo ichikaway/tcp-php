@@ -16,7 +16,7 @@ class TcpController
 
     private int $finCount = 0;
 
-    private TcpPacket $TcpPacket;
+    private PacketInterface $TcpPacket;
 
     /**
      * @param string $srcIp
