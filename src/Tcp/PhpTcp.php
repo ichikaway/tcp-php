@@ -8,14 +8,17 @@ class PhpTcp
     private string $dstIp;
     private int $port;
 
+    private bool $withMyIpPacket;
+
     private TcpController $TcpController;
 
     /**
      * @param string $srcIp
      */
-    public function __construct(string $srcIp)
+    public function __construct(string $srcIp, bool $withMyIpPacket = false)
     {
         $this->srcIp = $srcIp;
+        $this->withMyIpPacket = $withMyIpPacket;
     }
 
 
@@ -28,7 +31,7 @@ class PhpTcp
         }
         socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 5, 'usec' => 0]);
 
-        $this->TcpController= new TcpController($socket, $this->srcIp, $dstIp, $dstPort);
+        $this->TcpController= new TcpController($socket, $this->srcIp, $dstIp, $dstPort, $this->withMyIpPacket);
         $this->TcpController->handshake();
 
         //socket_close($socket);

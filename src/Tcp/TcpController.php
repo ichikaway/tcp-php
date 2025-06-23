@@ -23,7 +23,7 @@ class TcpController
      * @param string $dstIp
      * @param int $dstPort
      */
-    public function __construct($socket, string $srcIp, string $dstIp, int $dstPort)
+    public function __construct($socket, string $srcIp, string $dstIp, int $dstPort, bool $withOreIp)
     {
         $this->socket = $socket;
         $this->srcIp = $srcIp;
@@ -33,7 +33,13 @@ class TcpController
         $this->srcPort = rand(60000, 60100);
         $this->seqNum = rand(2000001000, 2000003000);  // シーケンス番号をランダムに設定
 
-        $this->TcpPacket = new TcpPacket($this->srcIp, $this->srcPort, $this->dstIp, $this->dstPort);
+        if ($withOreIp) {
+            echo "自作TCP/IP...\n";
+            $this->TcpPacket = new TcpIpPacket($socket, $this->srcIp, $this->srcPort, $this->dstIp, $this->dstPort);
+        } else {
+            echo "自作TCP...\n";
+            $this->TcpPacket = new TcpPacket($this->srcIp, $this->srcPort, $this->dstIp, $this->dstPort);
+        }
     }
 
     public function close()
