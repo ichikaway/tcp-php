@@ -1,0 +1,3 @@
+hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<"
+vbell off
+autodetach on

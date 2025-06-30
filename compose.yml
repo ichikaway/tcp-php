@@ -4,6 +4,8 @@ services:
       context: ./
     volumes:
       - ./:/tcp
+      - ./dotfiles/screenrc:/root/.screenrc
     working_dir: /tcp
+    tty: true
     cap_add:
       - NET_ADMIN
